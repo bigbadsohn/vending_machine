@@ -1,14 +1,33 @@
-# Importing JSON File with vending machine items and price
-import json
+# # Importing JSON File with vending machine items and price
+# import json
 
-with open('items.json', 'r') as itemData:
-    data = itemData.read()
+# with open('items.json', 'r') as itemData:
+#     data = itemData.read()
 
-obj = json.loads(data)
+# obj = json.loads(data)
 
 
-# test example hashmap of items
-items = {"cookie": 1.00, "coke": 0.75, "candy": 0.50}
+### GLOBAL VARS AND PROMPTS ###
+# example items list
+item_list = {"cookies": 0.50, "coke": 0.50, "gatorade": 1.00, "candy": 0.10}
+
+# user's credit value
+user_credit = 0
+
+# user's item cost
+user_item_cost = 0
+
+# user balance due
+user_money_due = 0
+
+# user item choice
+user_item_choice = ""
+
+# welcome prompt
+welcome_prompt = "Welcome to Dennis's Vending Machine! \n"
+
+# thank you prompt
+thankyou_prompt = "Thank you for visiting Dennis's Vending Machine! Come again."
 
 
 # function checking if user input is valid
@@ -24,78 +43,99 @@ def inputCheck(question, options):
 
     return user_input
 
-
-# example items list
-items = {"cookies": 0.50, "coke": 0.50, "gatorade": 1.00, "candy": 0.10}
-
-
-### GLOBAL PROMPTS ###
-# welcome prompt
-welcome_prompt = "Welcome to Dennis's Vending Machine \n"
-# thank you prompt
-thankyou_prompt = "Thank you for visiting Dennis's Vending Machine! Come again."
-
-
 ### INTRO PROCESS ###
-# list option of items user can purchase and price (from json file)
-print(welcome_prompt)
-print("Our items include: ")
-for key in items.keys():
-    print(key)
 
 
-### BUYING PROCESS ###
-# ask user to choose which item they want
-pickItemQuestion = "\nWhat item would you like? "
-itemOptions = items.keys()
+def intro():
+    # list option of items user can purchase and price (from json file)
+    print(welcome_prompt)
+    print("Our items include: ")
+    for key in item_list.keys():
+        print(key + " ${:0.2f}".format(item_list[key]))
 
-user_item_choice = inputCheck(pickItemQuestion, itemOptions)
-user_item_cost = items.get(user_item_choice)
 
-# Why is print statement default to 2 lines when ctrl + s?
-# How to display 2 decimal places for cost?
-print("Ok you have selected " + user_item_choice +
-      ". Please pay $" + str(user_item_cost))
+### ITEM CHOOSING PROCESS ###
+def itemChoosing():
+    # ask user to choose which item they want
+    pickItemQuestion = "\nWhat item would you like? "
+    itemOptions = item_list.keys()
+
+    user_item_choice = inputCheck(pickItemQuestion, itemOptions)
+    user_item_cost = item_list.get(user_item_choice)
+
+    # Why is print statement default to 2 lines when ctrl + s?
+    # How to display 2 decimal places for cost?
+    print("\nOk you have selected " + user_item_choice + ".")
+    print("That will cost ${:0.2f}\n".format(user_item_cost))
 
 
 ### PAYMENT PROCESS ###
-# list payment options to user
-pay_options_prompt = "Please pay with following 'n' = $0.05, 'd' = $0.10, 'q' = $0.25, 'b' = $1.00 \n"
 
-# hashmap of payment options
-paymentOptions = {'n': 0.05, 'd': 0.10, 'q': 0.25, 'b': 1.00}
+def payment():
+    # hashmap of payment options
+    paymentOptions = {'n': 0.05, 'd': 0.10, 'q': 0.25, 'b': 1.00}
+
+    # list payment options to user
+    pay_options_prompt = "Please pay by ihserting the following 'n' = $0.05, 'd' = $0.10, 'q' = $0.25, 'b' = $1.00 \n"
+
+    # ask user to enter money
+    inserted_money = inputCheck(pay_options_prompt, paymentOptions.keys())
+
+    # update user's credit and amount left due
+    user_credit += paymentOptions.get(inserted_money)
+    user_money_due = user_item_cost - user_credit
+
+    # ask if user wants to insert more money
+    if (user_money_due > 0):
+        print("You have $" + str(user_money_due) + " due.")
+        askInsertMore()
+    else:
+        askInsertMore()
 
 
-# ask user to enter money
-# inserted_money = inputCheck(pay_options_prompt, paymentOptions.items())
+# Asks user if they want to insert more money
+# either runs payment function again or returns false
+def askInsertMore():
+
+    insertMoreQuestion = "Would you like to insert more money? 'y' = yes, 'n' = no \n"
+    insertMoreOptions = ['y', 'n']
+
+    insertMoreChoice = inputCheck(insertMoreQuestion, insertMoreOptions)
+    if (insertMoreChoice == 'y'):
+        payment()
+    else:
+        # insertMoreChoice == 'n'
+        return False
 
 
-# check if user inserted enough money for item
-user_money_credit = 0
+# checks if user's entered money is enough to buy chosen item
+# happens when insert money returns false
+def checkEnoughMoney():
 
+    # user confirms they don't want to insert more money
+    if (askInsertMore == False):
+
+        # check if user has enough money for chosen item
+        # if yes, give them item and subtract from their credit
+        if (user_money_due <= 0):
+
+            print("Here is your " + user_item_choice)
+
+        # if no, ask if they want to insert more money
+
+        # if no, return credit (change) and
+
+
+def transactionProcess():
+    pass
 
 ### POST PROCESSING ###
 # if yes, give item and ask if they want to buy something else with extra money
 # if yes repeat process
 # if no give user change
-
-# if no, ask user to enter more money
-def payMore():
-
-    payMoreQuestion = "Would you like to insert more money? 'y' = yes, 'n' = no \n"
-    payMoreOptions = ['y', 'n']
-
-    userPayMore = inputCheck(payMoreQuestion, payMoreOptions)
-
-    if (userPayMore == 'y'):
-        # add payment function
-        pass
-    else:
-        thankyou_prompt
+# main
 
 
-# if yes repeat enter money process
-# if no return money
-
-
-# Main()
+intro()
+itemChoosing()
+payment()
